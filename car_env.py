@@ -21,6 +21,7 @@ class CarEnv:
         self.pos = pygame.Vector2(self.width - 50, self.height - 50)
         self.angle = 180
         self.done = False
+        self.prev_distance = self.pos.distance_to(self.goal)
 
         return self._get_state()
 
@@ -31,19 +32,24 @@ class CarEnv:
         self._apply_action(action)
         self._move_forward()
 
+        # ORIGINAL
+        # reward: -0.01, progress*0.15, +=20, -10
+
         reward = -0.01 # Helps w/ stalling so agent must move
+
         distance = self.pos.distance_to(self.goal)
+        progress = self.prev_distance - distance
+        reward += progress * 0.15 # Progress reward weight
+
+        self.prev_distance = distance
 
         if distance < 25:
-            reward += 5
+            reward += 20
             self.done = True
-        else:
-            reward += 0.2 - (distance / (self.width)) # Getting closer = more reward, just chose width cause why not
 
         if not self._within_bounds():
             self.done = True
-            reward = -5 # Penalty for going oob
-
+            reward = -10 # Penalty for going oob
 
         return self._get_state(), reward, self.done, {}
 
@@ -54,7 +60,7 @@ class CarEnv:
         elif action == 2:
             self.angle += TURN_ANGLE
 
-        self.angle = self.angle % 360 # Normalize so within 0 to 360
+        self.angle = self.angle % 360 # Normalize so within 0 to 360 deg
 
     def _move_forward(self):
         rad = math.radians(self.angle)
@@ -67,16 +73,12 @@ class CarEnv:
     def _get_state(self):
         #return (self.pos.x, self.pos.y, self.angle)
 
-        relative_goal = self.goal - self.pos
-
         # Make pos more broad to fit single states so less memory & easier control
-        # 25px & 20 deg cells
+        # 25px & 30 deg cells
         return (
             int(self.pos.x // 25),
             int(self.pos.y // 25),
-            int(self.angle % 360 // 20),
-            int(relative_goal.x // 25),
-            int(relative_goal.y // 25)
+            int(self.angle % 360 // 30),
         )
 
     def render(self, screen):

@@ -19,7 +19,7 @@ def main():
 
     exploration_r = 1.0
     min_exploration = 0.02
-    exploration_decay = 0.98
+    exploration_decay = 0.995
 
     try:
         q_table = load_q_table(model_path, len(env.action_space))
@@ -33,6 +33,7 @@ def main():
     while running:
         state = env.reset()
         done = False
+        total_reward = 0
 
         while not done:
             for event in pygame.event.get():
@@ -47,6 +48,8 @@ def main():
                 action = np.argmax(q_table[state]) # Exploit known action
 
             next_state, reward, done, _ = env.step(action)
+
+            total_reward+=reward
             
 
             #---- Q-learning updates ----
@@ -59,6 +62,8 @@ def main():
             clock.tick(FPS)
 
         exploration_r = max(min_exploration, exploration_r * exploration_decay)
+
+        print(f"Episode reward: {total_reward:.2f}")
 
     save_q_table(q_table, model_path)
     print("Training complete! Q-table saved.")
