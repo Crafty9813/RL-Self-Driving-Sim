@@ -11,6 +11,8 @@ discount_f = 0.9
 
 model_path = "q_table.pkl"
 
+testing_mode = False # MODIFY THIS IF YOUR TRAINING OR TESTING
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((800, 600))
@@ -43,32 +45,39 @@ def main():
                     running = False
                     done = True
 
-            # epsilon greedy method
-            if np.random.rand() < exploration_r:
-                action = np.random.choice(env.action_space) # Choose random action for exploration
+            if testing_mode:
+                action = np.argmax(q_table[state]) # EXPLOIT ONLY IF TESTING
             else:
-                action = np.argmax(q_table[state]) # Exploit known action
+                # ---- TRAINING (epsilon greedy method) ----
+                if np.random.rand() < exploration_r:
+                    action = np.random.choice(env.action_space) # Choose random action for exploration
+                else:
+                    action = np.argmax(q_table[state]) # Exploit known action
 
             next_state, reward, done, _ = env.step(action)
-
             total_reward+=reward
             
-
-            #---- Q-learning updates ----
-            best_next = np.max(q_table[next_state])
-            q_table[state][action] += lr * (reward + discount_f * best_next - q_table[state][action])
+            if not testing_mode:
+                #---- Q-table updates (ONLY DURING TRAINING) ----
+                best_next = np.max(q_table[next_state])
+                q_table[state][action] += lr * (reward + discount_f * best_next - q_table[state][action])
 
             state = next_state
 
             env.render(screen)
             clock.tick(FPS)
 
-        exploration_r = max(min_exploration, exploration_r * exploration_decay)
+        # IF TRAINING DECAY EXPLORATION RATE SO LATER ON STILL EXPLOITS
+        if not testing_mode:
+            exploration_r = max(min_exploration, exploration_r * exploration_decay)
 
         print(f"Episode: {episode_num}, reward: {total_reward:.2f}")
 
-    save_q_table(q_table, model_path)
-    print("Training complete! Q-table saved.")
+    if not testing_mode:
+        save_q_table(q_table, model_path)
+        print("Training complete! Q-table saved.")
+    else:
+        print("Testing done, Q-table not modified.")
 
     pygame.quit()
 
