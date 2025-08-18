@@ -29,8 +29,10 @@ def main():
         print("New Q-table created")
 
     running = True
+    episode_num = 0
 
     while running:
+        episode_num += 1
         state = env.reset()
         done = False
         total_reward = 0
@@ -63,7 +65,7 @@ def main():
 
         exploration_r = max(min_exploration, exploration_r * exploration_decay)
 
-        print(f"Episode reward: {total_reward:.2f}")
+        print(f"Episode: {episode_num}, reward: {total_reward:.2f}")
 
     save_q_table(q_table, model_path)
     print("Training complete! Q-table saved.")

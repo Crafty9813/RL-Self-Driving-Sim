@@ -39,7 +39,7 @@ class CarEnv:
 
         distance = self.pos.distance_to(self.goal)
         progress = self.prev_distance - distance
-        reward += progress * 0.15 # Progress reward weight
+        reward += progress * 0.11 # Progress reward weight
 
         self.prev_distance = distance
 
