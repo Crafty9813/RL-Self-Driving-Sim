@@ -36,14 +36,14 @@ def main():
     while running:
         episode_num += 1
         state = env.reset()
-        done = False
+        episode_done = False
         total_reward = 0
 
-        while not done:
+        while not episode_done: # Run a single episode
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                    done = True
+                    episode_done = True
 
             if testing_mode:
                 action = np.argmax(q_table[state]) # EXPLOIT ONLY IF TESTING
@@ -54,7 +54,7 @@ def main():
                 else:
                     action = np.argmax(q_table[state]) # Exploit known action
 
-            next_state, reward, done, _ = env.step(action)
+            next_state, reward, episode_done, _ = env.step(action)
             total_reward+=reward
             
             if not testing_mode:

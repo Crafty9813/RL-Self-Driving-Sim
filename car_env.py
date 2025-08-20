@@ -20,13 +20,13 @@ class CarEnv:
     def reset(self):
         self.pos = pygame.Vector2(self.width - 50, self.height - 50)
         self.angle = 180
-        self.done = False
+        self.episode_done = False
         self.prev_distance = self.pos.distance_to(self.goal)
 
         return self._get_state()
 
     def step(self, action):
-        if self.done:
+        if self.episode_done:
             return self._get_state(), 0, True, {}
         
         self._apply_action(action)
@@ -45,13 +45,13 @@ class CarEnv:
 
         if distance < 25:
             reward += 20
-            self.done = True
+            self.episode_done = True
 
         if not self._within_bounds():
-            self.done = True
+            self.episode_done = True
             reward = -10 # Penalty for going oob
 
-        return self._get_state(), reward, self.done, {}
+        return self._get_state(), reward, self.episode_done, {}
 
     def _apply_action(self, action):
         # 0 = forward, 1 = left, 2 = right
