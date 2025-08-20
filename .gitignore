@@ -3,4 +3,6 @@ venv/
 __pycache__/
 *.pyc
 
+q_table.pkl
+
 .DS_Store

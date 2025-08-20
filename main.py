@@ -11,7 +11,7 @@ discount_f = 0.9
 
 model_path = "q_table.pkl"
 
-testing_mode = False # MODIFY THIS IF YOUR TRAINING OR TESTING
+testing_mode = True # MODIFY THIS IF YOUR TRAINING OR TESTING
 
 def main():
     pygame.init()
